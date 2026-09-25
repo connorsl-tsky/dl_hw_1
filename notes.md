@@ -1,6 +1,28 @@
 # CONST things to experiment with
  - hyperparameter tuning
 
+
+
+# multiple linear regression
+## failed research
+https://statisticsfundamentals.com/multiple-linear-regression/
+  r^2 = 1 - SSres/SStot (residual sum of squares, and total sum of squares)
+  adjusted r^2 = 1 - (1-R²)(n-1)/(n-p-1) (penalized for number of parameters)
+https://365datascience.com/tutorials/statistics-tutorials/sum-squares/ 
+  sum of squares total (sstot) = ssres + ssreg
+  sum of squares residual (ssres) = sum((y-yhat)^2)
+  ssreg = regression sum of squares = sum((x-xbar)^2)
+  wait that doesn't work
+
+## how to handle b with different feature sets? what is 
+oh it's supposed to be a single value
+
+WHY IS MY ERROR GETTING BIGGER????
+well first we should take yhat and input it to optimizeSGD because less computation
+https://www.geeksforgeeks.org/machine-learning/gradient-descent-in-linear-regression/ 
+maybe my y and yhat are reversed
+when are her office hours
+
 # techniques in class
 (these might be useful to consider if we build the models and it turns out that they are really bad)
  - model validation
