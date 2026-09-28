@@ -9,14 +9,17 @@ let's practice in the uhm. terminal
 train.dtypes - see datatypes
 df.dropna() to drop na - maybe. we'll try it without and compare 
 print(df[df["Code"] == "IN"]) - filtering rows
-df[['First', 'Last']] = df.Name.str.split(expand=True) - delimit
-data['result'] = data['result'].map(lambda x: x.lstrip('+-').rstrip('aAbBcC')) - filter
+df[['First', 'Last']] = df.Name.str.split(char, expand=True) - delimit
+data['result'] = data['result'].map(lambda x: x.lstrip('+-').rstrip('aAbBcC')) - trim characters
 df.shape - get dims
 df.drop(columns=["B", "C"]) - drop columns
 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.replace.html - for replace
 not really sure how it works
 how to tell if a column has any NaN
 change the dtype of the new columns
+df.replace(old, new) to replace 
+df.isnull(), df[col].isnull() - returns df with False/True and can aggregate from there
+e.g., df[df[col].isnull() == True]
 
 # multiple linear regression
 ## failed research

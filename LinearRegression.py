@@ -51,15 +51,15 @@ class LinearRegression:
                 yhat = predict(x-train) 
                 w, b = optimizerSGD(yhat, y-train)
         """
-        prev_error = 999999999999999
         curr_error = self.validate(x_val, y_val)
+        prev_error = curr_error + 1
         print(f"train: prev: {prev_error}, curr: {curr_error}, curr-prev: {curr_error-prev_error}")
         print(f"train: w: {self.w}, b: {self.b}")
         count = 0
         # while (curr_error - prev_error) < 0:
         while abs((curr_error - prev_error)) > self.early_stop:
             yhat = self.predict(x_train) # TODO why are we calling predict?
-            print(f"train: yhat: {yhat}")
+            # print(f"train: yhat: {yhat}")
             self.w, self.b = self.optimizeSGD(x_train, y_train) 
             print(f"train: new w: {self.w}, new b: {self.b}")
             prev_error = curr_error
@@ -93,9 +93,9 @@ class LinearRegression:
             L = 1/n sum(i=1, n)([Y-hati - Yi]^2)
         """
         print(f"lossmSE: yhat shape: {yhat.shape}, y shape: {y.shape}, should be equal")
-        print(f"lossMSE: yhat: {yhat}, y: {y}")
+        # print(f"lossMSE: yhat: {yhat}, y: {y}")
         if yhat.shape != y.shape:
-            print(f"lossMSE: wrong sizes! yhat: {yhat}, y: {y}")
+            # print(f"lossMSE: wrong sizes! yhat: {yhat}, y: {y}")
             return
         n = yhat.shape[0]
         loss = np.sum(((y-yhat)**2))/n
@@ -115,7 +115,7 @@ class LinearRegression:
         b is (samp, 1)
         """
 
-        print(f"optimizeGSD: x: {x}, y: {y}, x shape: {x.shape}, y shape: {y.shape}")
+        # print(f"optimizeGSD: x: {x}, y: {y}, x shape: {x.shape}, y shape: {y.shape}")
         if x.shape[0] != y.shape[0]: # same rows in x as len(y)
             print(f"optimizeSGD: wrong size! both need same rows x: {x.shape}, y: {y.shape}")
             return
@@ -123,18 +123,18 @@ class LinearRegression:
         n = y.shape[0]
         print(f"optimizeSGD: n: {n}")
 
-        print(f"optimizeSGD: compute yhat: w: {self.w}, xT {x.transpose()}, b: {self.b}")
+        # print(f"optimizeSGD: compute yhat: w: {self.w}, xT {x.transpose()}, b: {self.b}")
         yhat = np.array(np.dot(self.w, x.transpose())).transpose() + self.b # result is (samp, 1)
-        print(f"optimizeSGD: compute error: yhat: {yhat}, y: {y}")
+        # print(f"optimizeSGD: compute error: yhat: {yhat}, y: {y}")
         error = (y-yhat)
-        print(f"optimizeSGD: compute dldw: error: {error}, xT: {x.transpose()}, n: {n}")
+        # print(f"optimizeSGD: compute dldw: error: {error}, xT: {x.transpose()}, n: {n}")
         dldw = np.array(np.array(np.dot(x.transpose(), error)) * -2/n).transpose() # result is (1, feat)
         print(f"optimizeSGD: dldw: {dldw}")
 
         dldb = np.sum(y-yhat) * -2/n
         print(f"optimizeSGD: dldb: {dldb}")
-        return (self.w - dldw/1000), (self.b - dldb/1000)
-        # return (self.w - self.learning_rate*dldw), (self.b - self.learning_rate*dldb)
+        # return (self.w - dldw/1000), (self.b - dldb/1000)
+        return (self.w - self.learning_rate*dldw), (self.b - self.learning_rate*dldb)
 
     def validate(self, x, y):
         """
@@ -145,7 +145,7 @@ class LinearRegression:
         y is (samp, 1)
         """
         yhat = self.predict(x) # make predictions
-        print(f"validate: yhat: {yhat}, y: {y}")
+        # print(f"validate: yhat: {yhat}, y: {y}")
         return self.lossMSE(yhat, y) # determine loss
 
     def test(self, x, y):
@@ -202,7 +202,8 @@ def test_rand_2d_array():
     return
 
 if __name__ == "__main__":
-    learning_rate = 0.0001
+    # learning_rate = 0.0001
+    learning_rate = 0
     early_stop = 0.0000001
     num_features = 3
     sample_size = 4
