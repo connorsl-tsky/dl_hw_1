@@ -2,6 +2,21 @@
  - hyperparameter tuning
 
 
+# preprocessing
+first we need to read a csv file
+https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html 
+let's practice in the uhm. terminal
+train.dtypes - see datatypes
+df.dropna() to drop na - maybe. we'll try it without and compare 
+print(df[df["Code"] == "IN"]) - filtering rows
+df[['First', 'Last']] = df.Name.str.split(expand=True) - delimit
+data['result'] = data['result'].map(lambda x: x.lstrip('+-').rstrip('aAbBcC')) - filter
+df.shape - get dims
+df.drop(columns=["B", "C"]) - drop columns
+https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.replace.html - for replace
+not really sure how it works
+how to tell if a column has any NaN
+change the dtype of the new columns
 
 # multiple linear regression
 ## failed research
@@ -17,11 +32,30 @@ https://365datascience.com/tutorials/statistics-tutorials/sum-squares/
 ## how to handle b with different feature sets? what is 
 oh it's supposed to be a single value
 
-WHY IS MY ERROR GETTING BIGGER????
+## WHY IS MY ERROR GETTING BIGGER????
 well first we should take yhat and input it to optimizeSGD because less computation
 https://www.geeksforgeeks.org/machine-learning/gradient-descent-in-linear-regression/ 
 maybe my y and yhat are reversed
 when are her office hours
+they're by appointment at Digital Futures
+
+https://aimltutorial.in/lesson/gradient-descent-mlrmultiple-linear-regression/
+important
+
+i got it to work a lot better, if i turn the learning rate way down to like 0.0001
+https://developers.google.com/machine-learning/crash-course/linear-regression/hyperparameters
+okay so if the learning rate is too big, it bounces around wildly
+my learning rate was 0.01, that was too big ig
+what if the learning rate changes with the weights?
+e.g. hyperparameter tuning
+so if dldw is 1000, maybe i want w to change by 1
+if it's 10, maybe 0.01
+so dldw/1000?
+let's try it
+it gets really slow near the end. like a lot slower
+having the constant was a nicer balance, perhaps
+i wonder if we can measure that
+
 
 # techniques in class
 (these might be useful to consider if we build the models and it turns out that they are really bad)

@@ -1,4 +1,4 @@
- - [x] take notes on the assignment and generate a list of questions - 9/22
+ - [x] take notes on the assignment and generate a list of questions - 9/22/26
  - [x] break down the assignment and plan what needs to be done - 9/22
  - [x] what is the validation set? - 9/22
  - [x] what other techniques have we learned in class that we might need to consider for this assignment - 9/22
@@ -12,8 +12,14 @@
         e.g. have two functions so i can import them into the notebook itself
         mostly works, i'm forgetting my python syntax
  - [ ] implement and test linear regression
- - [ ] repeat for other models (need a generalized DNN class so i can specify the layers and such)
+       - [x] with test data  - 9/25/26
+       - [ ] preprocessing
+       - [ ] with real data
+ - [ ] DNN
+       - [ ] dummy data
+       - [ ] with real data
  - [ ] import models and code and submit to kaggle
+ - [ ] tweak for a good r^2
 
 
  

@@ -32,13 +32,13 @@ class TestLinearRegression:
 
     def test_lossMSE(self):
         print("TEST LOSS MSE")
-        yhat = np.array([[15],[43],[71]])
-        y = np.array([[12],[50],[67]])
+        yhat = np.array([[12],[13],[14]])
+        y = np.array([[10],[11],[12]])
         l = self.lr.lossMSE(yhat,y)
         """
         9 + 49 + 16 = 74/3 = 24.666
         """
-        print(f"l predicted: 24.666, l: {l}")
+        print(f"l predicted: 4.0, l: {l}")
         print()
         return
 
@@ -49,7 +49,7 @@ class TestLinearRegression:
         self.lr.w = np.array([[3,4]])
         self.lr.b = 3
         w, b = self.lr.optimizeSGD(x, y)
-        print(f"w: want: [[-92.3?, -117.3?]] got: {w}, b: want: -75? got: {b}")
+        print(f"w: want: [[-92.3?, -117.3?]] got: {w}, b: want: -23 got: {b}")
         print()
         return
 
