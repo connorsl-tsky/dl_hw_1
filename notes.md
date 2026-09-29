@@ -3,6 +3,36 @@
 
 
 
+# DNN
+
+## i'm encountering an issue with early stop being called to early
+i can try removing early stop
+see what that does
+i'll try it
+our goal right now is to make it look like it's good
+
+there's certainly something that we're missing
+we're worried about prediction, so we can look at the model structure to make sure it looks good
+we have an input layer, 8, then output
+i think
+i assume the input layer is added automatically
+or something like that
+but we know we have to use a feed forward neural network
+https://machinelearningmastery.com/using-normalization-layers-to-improve-deep-learning-models/
+hmm normalization
+what if i just add one to the model
+
+okay adding the normalization layer helped a lot
+i can get a r2 of .5, but i'd like something over .8
+let's do some more research, but maybe we should use ai
+we also have to consider that i'm overfitting linear regression, and perhaps to explore that more
+
+https://datacalculus.com/en/knowledge-hub/data-analytics/data-cleaning-and-preprocessing/data-preprocessing-for-neural-networks/
+maybe i can also clean the data more
+maybe the setting n/a to zero might not have been the best idea
+determining outliers too
+
+
 # preprocessing
 first we need to read a csv file
 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html 
@@ -21,6 +51,10 @@ change the dtype of the new columns
 df.replace(old, new) to replace 
 df.isnull(), df[col].isnull() - returns df with False/True and can aggregate from there
 e.g., df[df[col].isnull() == True]
+df.isnull().any() to see which columns are teh culprits
+PctPrivateCoverageAlone - 480
+PctEmployed16_Over - 123
+PctSomeCol18_24 - 1828
 
 # multiple linear regression
 ## failed research

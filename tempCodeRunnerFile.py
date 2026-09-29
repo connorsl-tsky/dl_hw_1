@@ -1,1 +1,2 @@
-10
+, y_train)
+    dnn1.test(x_test)
