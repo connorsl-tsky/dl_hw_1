@@ -13,10 +13,12 @@
         mostly works, i'm forgetting my python syntax
  - [ ] implement and test linear regression
        - [x] with test data  - 9/25/26
-       - [ ] preprocessing
-       - [ ] with real data
+       - [x] preprocessing - 9/28/26
+       - [x] with real data - 9/29/26
+       - [x] do a train/test/val split to self-evaluate
  - [ ] DNN
-       - [ ] dummy data
+       - [ ] dummy data and pytorch or whatever gfg uses
+             - [ ] plan and design first
        - [ ] with real data
  - [ ] import models and code and submit to kaggle
  - [ ] tweak for a good r^2

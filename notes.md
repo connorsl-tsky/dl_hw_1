@@ -2,6 +2,7 @@
  - hyperparameter tuning
 
 
+
 # preprocessing
 first we need to read a csv file
 https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html 
@@ -58,6 +59,25 @@ let's try it
 it gets really slow near the end. like a lot slower
 having the constant was a nicer balance, perhaps
 i wonder if we can measure that
+
+## problem - the association is really bad
+i mean, maybe it's not a linear relationship at all?
+well isn't DNN just glorified linear regression?
+kinda sorta. probably not really 
+i need a plan
+well experimenting with hyperparameters can maybe be used to try to improve things
+i can probably speed it up a bunch by removing console output
+i can try R2-adjusted - but that might just make it smaller
+i kind of want to investigate what makes SSTO different from the two calculations
+or if i'm calculated R2 right
+we probably are, we just might need to use DNNs
+we can try with that, then we can play around with different ways of optimizing it. perhaps
+so move on to DNNs? yeah, and if they're a bust we can always go back to optimizing LR
+but it's likely that the data isn't linear. 
+oh we might have to try a different loss function as some point. 
+we have time
+https://www.geeksforgeeks.org/machine-learning/epoch-in-machine-learning/ 
+perhaps it's overfitted?
 
 
 # techniques in class

@@ -84,19 +84,21 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     df["upperBinnedInc"] = df["upperBinnedInc"].astype(np.float64)
     # print(df["lowerBinnedInc"])
     # print(df["upperBinnedInc"])
+
+    df = df.drop(columns=["Geography"])
     
-    # turn Geography to state
-    df[["county", "state"]] = df.Geography.str.split(",", expand=True)
-    df = df.drop(columns=["county", "Geography"])
-    # print(df["state"])
+    # # turn Geography to state
+    # df[["county", "state"]] = df.Geography.str.split(",", expand=True)
+    # df = df.drop(columns=["county", "Geography"])
+    # # print(df["state"])
 
-    # number states
-    df["state"] = df["state"].map(lambda x: x.strip())
-    df["state"] = df["state"].map(lambda x: states[x])
-    # print(df["state"])
+    # # number states
+    # df["state"] = df["state"].map(lambda x: x.strip())
+    # df["state"] = df["state"].map(lambda x: states[x])
+    # # print(df["state"])
 
-    # change dtype of states
-    df["state"] = df["state"].astype(np.int64)
+    # # change dtype of states
+    # df["state"] = df["state"].astype(np.int64)
 
     return df
 
@@ -129,6 +131,45 @@ def train_val_split(x: np.ndarray, y: np.ndarray, pct_val: float):
         size -= 1
     return x, y, val_x, val_y
 
+def train_test_val_split(x: np.ndarray, y: np.ndarray, pct_val: float):
+    # print(f"train_val_split: x shape: {x.shape}")
+    if pct_val > .5:
+        print(f"train_test_val_split - pct_val cannot be over .5")
+        return None
+
+    size = x.shape[0]
+    count = math.ceil(size * pct_val)
+    # print(f"train_val_split: count: {count}")
+
+    val_x_dim = list(x.shape)
+    val_x_dim[0] = count
+    val_x = np.zeros(val_x_dim)
+    # print(f"train_val_split: val: {val}")
+    val_y = np.zeros((count, 1))
+    test_x_dim = list(x.shape)
+    test_x_dim[0] = count
+    test_x = np.zeros(test_x_dim)
+    test_y = np.zeros((count, 1))
+
+    for i in range(count):
+        j = random.randint(0, size-1) # index to transfer
+        # print(f"train_val_split: j: {j}")
+        val_x[i] = x[j]
+        val_y[i] = y[j]
+        x = np.append(x[:j], x[j+1:], axis=0)
+        y = np.append(y[:j], y[j+1:], axis=0)
+        size -= 1
+    for i in range(count):
+        j = random.randint(0, size-1) # index to transfer
+        # print(f"train_val_split: j: {j}")
+        test_x[i] = x[j]
+        test_y[i] = y[j]
+        x = np.append(x[:j], x[j+1:], axis=0)
+        y = np.append(y[:j], y[j+1:], axis=0)
+        size -= 1
+    return x, y, test_x, test_y, val_x, val_y
+
+
 if __name__ == "__main__":
     train = pd.read_csv("train.csv", na_values=[0.0])
     print(train.isnull().sum())
@@ -156,3 +197,14 @@ if __name__ == "__main__":
     print(f"MAIN, y: {y}")
     print(f"MAIN val x: {val_x}")
     print(f"MAIN, val y: {val_y}")
+    x = np.array([[1,2],[3,4],[5,6],[7,8],[9,10],[11,12],[13,14],[15,16],[17,18]])
+    y = np.array([[2],[4],[6],[8],[10],[12],[14],[16],[18]])
+    x, y, test_x, test_y, val_x, val_y = train_test_val_split(x, y, .2)
+    print(f"\n\nMAIN TRAIN TEST VAL SPLIT")
+    print(f"MAIN, x: {x}")
+    print(f"MAIN, y: {y}")
+    print(f"MAIN test_x: {test_x}")
+    print(f"MAIN test_y: {test_y}")
+    print(f"MAIN val x: {val_x}")
+    print(f"MAIN, val y: {val_y}")
+        

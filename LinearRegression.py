@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 
 class LinearRegression:
     def __init__(self, learning_rate: float, early_stop: float, num_features: int, sample_size: int): 
@@ -67,6 +68,8 @@ class LinearRegression:
             print(f"train: new prev: {prev_error}, new curr: {curr_error}, new curr-prev: {curr_error - prev_error}")
             # user = input("pause")
             count += 1
+            if math.isnan(curr_error - prev_error):
+                return None
         print(f"train: FINAL MODEL: w: {self.w}, b: {self.b}")
         return count
 
@@ -148,15 +151,15 @@ class LinearRegression:
         # print(f"validate: yhat: {yhat}, y: {y}")
         return self.lossMSE(yhat, y) # determine loss
 
-    def test(self, x, y):
+    def test(self, test_x, test_y):
         """
-        test(x-test, y)   
+        test(x-test, y-test)   
             yhat = predict(x)
             computeR2(y, yhat)
         """
-        yhat = self.predict(x)
-        print(f"R2: {self.R2(yhat, y)}")
-        return
+        yhat = self.predict(test_x)
+        # print(f"R2: {self.R2(yhat, test_y)}")
+        return self.R2(yhat, test_y)
 
     def R2(self, yhat: np.ndarray, y: np.ndarray):
         """
@@ -179,15 +182,25 @@ class LinearRegression:
         if yhat.shape[0] != y.shape[0]:
             print(f"R-squared: wrong shapes! should be same number of features, yhat: {yhat.shape}, y: {y.shape}")
             return
+        ybar = np.average(y)
 
-        ssr = np.sum((yhat-np.average(y))**2) # regression sum of squares
+        ssr = np.sum((yhat-ybar)**2) # regression sum of squares
         sse = np.sum((y-yhat)**2) # error sum of squares
         ssto = ssr + sse # total sum of squares
-        print(f"R-squared: sse: {sse}, ssr: {ssr}, ssto: {ssto}, test ssto: {np.sum((y-np.average(y))**2)}")
+        print(f"R-squared: sse: {sse}, ssr: {ssr}, ssto: {ssto}, test ssto: {np.sum((y-ybar)**2)}")
         return ssr / ssto # r^2
+"""
+(yhat-ybar)**2 + (y-yhat)**2 = (y-ybar)**2
+yhat**2-ybaryhar+ybar**2 + y**2-yyhat+yhat**2 = y**2-yybar+ybar**2
 
+2yhat**2 - ybaryhat - yyhat + ybar**2 + y**2 = y**2 - yybar + ybar**2
+
+2yhat**2 - ybaryhat - yyhat + yybar = 0
+hm?
+"""
 
 def test_rand_1d_array():
+    
     x = [0,0,0]
     lr = LinearRegression(0,0,0,0)
     lr.rand_1d_array(x)
@@ -203,7 +216,7 @@ def test_rand_2d_array():
 
 if __name__ == "__main__":
     # learning_rate = 0.0001
-    learning_rate = 0
+    learning_rate = 0.0001
     early_stop = 0.0000001
     num_features = 3
     sample_size = 4
@@ -224,8 +237,8 @@ if __name__ == "__main__":
 
     num_runs = lr.train(x_train, y_train, x_val, y_val)
     print(f"num_runs: {num_runs}")
-    lr.test(x_test, y_test)
-    
+    R2 = lr.test(x_test, y_test)
+    print(f"R2: {R2}")
 
 
 
