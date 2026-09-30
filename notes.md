@@ -31,6 +31,12 @@ https://datacalculus.com/en/knowledge-hub/data-analytics/data-cleaning-and-prepr
 maybe i can also clean the data more
 maybe the setting n/a to zero might not have been the best idea
 determining outliers too
+yeah but i feel like the outliers are uhm. important
+like wealthiness should matter, yeah?
+and the data is being normalized, isn't it?
+fark, now i don't know
+i wish i could graph the data
+maybe we should start doing triage, and getting ourselves into a submittable state for Friday. it's gotta get in by Friday
 
 
 # preprocessing

@@ -15,11 +15,16 @@
        - [x] with test data  - 9/25/26
        - [x] preprocessing - 9/28/26
        - [x] with real data - 9/29/26
-       - [x] do a train/test/val split to self-evaluate
+       - [x] do a train/test/val split to self-evaluate - 9/29/26
  - [ ] DNN
-       - [ ] dummy data and pytorch or whatever gfg uses
-             - [ ] plan and design first
+       - [x] dummy data and pytorch or whatever gfg uses - 9/29/26
+             - [x] plan and design first - 9/29/26
        - [ ] with real data
+             - XX[ ] clean data more. ranges, means, and outliers - 9/29/26
+       - [ ] determine bests for each model
+       - [ ] output into graph
+       - [ ] get into submittable state - graphs, report, etc.
+       - [ ] polish 
  - [ ] import models and code and submit to kaggle
  - [ ] tweak for a good r^2
 

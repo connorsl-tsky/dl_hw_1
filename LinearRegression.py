@@ -19,7 +19,7 @@ class LinearRegression:
 
         # self.rand_h_vector(self.w)
         # self.rand_v_vector(self.b)
-        print(f"init: rand w: {self.w}, rand b: {self.b} ")
+        # print(f"init: rand w: {self.w}, rand b: {self.b} ")
         return
 
     def rand_h_vector(self, x: np.ndarray):
@@ -54,24 +54,28 @@ class LinearRegression:
         """
         curr_error = self.validate(x_val, y_val)
         prev_error = curr_error + 1
-        print(f"train: prev: {prev_error}, curr: {curr_error}, curr-prev: {curr_error-prev_error}")
-        print(f"train: w: {self.w}, b: {self.b}")
+        # print(f"train: prev: {prev_error}, curr: {curr_error}, curr-prev: {curr_error-prev_error}")
+        # print(f"train: w: {self.w}, b: {self.b}")
         count = 0
+        loss = [curr_error]
         # while (curr_error - prev_error) < 0:
-        while abs((curr_error - prev_error)) > self.early_stop:
+        # while abs((curr_error - prev_error)) > self.early_stop:
+        while (curr_error - prev_error) < 0 and count <= self.early_stop: 
             yhat = self.predict(x_train) # TODO why are we calling predict?
             # print(f"train: yhat: {yhat}")
             self.w, self.b = self.optimizeSGD(x_train, y_train) 
-            print(f"train: new w: {self.w}, new b: {self.b}")
+            # print(f"train: new w: {self.w}, new b: {self.b}")
             prev_error = curr_error
             curr_error = self.validate(x_val, y_val)
+            loss.append(curr_error)
             print(f"train: new prev: {prev_error}, new curr: {curr_error}, new curr-prev: {curr_error - prev_error}")
             # user = input("pause")
             count += 1
             if math.isnan(curr_error - prev_error):
                 return None
-        print(f"train: FINAL MODEL: w: {self.w}, b: {self.b}")
-        return count
+        # print(f"train: FINAL MODEL: w: {self.w}, b: {self.b}")
+        print(f"final loss: {curr_error}, num runs: {count}")
+        return loss
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         """
@@ -82,11 +86,11 @@ class LinearRegression:
         """
         xT = x.transpose()
         if self.w.shape[1] != xT.shape[0]: # 1xn == nxm
-            print(f"predict: wrong size!, w: {len(self.w)}, xT: {xT.shape}")
+            print(f"predict: wrong size!, w: {self.w.shape}, xT: {xT.shape}, second of w should be same as first of xT")
             return None
-        print(f"predict: w shape: {self.w.shape}, xT shape: {xT.shape}, b: {self.b}")
+        # print(f"predict: w shape: {self.w.shape}, xT shape: {xT.shape}, b: {self.b}")
         yhat = np.array(np.dot(self.w, xT)) + self.b
-        print(f"predict: yhat shape: {yhat.shape}")
+        # print(f"predict: yhat shape: {yhat.shape}")
         return yhat.transpose()
         
 
@@ -95,14 +99,14 @@ class LinearRegression:
         lossMSE(y^, y) -> int (error)
             L = 1/n sum(i=1, n)([Y-hati - Yi]^2)
         """
-        print(f"lossmSE: yhat shape: {yhat.shape}, y shape: {y.shape}, should be equal")
+        # print(f"lossmSE: yhat shape: {yhat.shape}, y shape: {y.shape}, should be equal")
         # print(f"lossMSE: yhat: {yhat}, y: {y}")
         if yhat.shape != y.shape:
-            # print(f"lossMSE: wrong sizes! yhat: {yhat}, y: {y}")
+            print(f"lossMSE: wrong sizes! yhat: {yhat}, y: {y}")
             return
         n = yhat.shape[0]
         loss = np.sum(((y-yhat)**2))/n
-        print(f"lossMSE: loss: {loss}")
+        # print(f"lossMSE: loss: {loss}")
         return loss
 
     def optimizeSGD(self, x: np.ndarray, y: np.ndarray):
@@ -124,7 +128,7 @@ class LinearRegression:
             return
 
         n = y.shape[0]
-        print(f"optimizeSGD: n: {n}")
+        # print(f"optimizeSGD: n: {n}")
 
         # print(f"optimizeSGD: compute yhat: w: {self.w}, xT {x.transpose()}, b: {self.b}")
         yhat = np.array(np.dot(self.w, x.transpose())).transpose() + self.b # result is (samp, 1)
@@ -132,10 +136,10 @@ class LinearRegression:
         error = (y-yhat)
         # print(f"optimizeSGD: compute dldw: error: {error}, xT: {x.transpose()}, n: {n}")
         dldw = np.array(np.array(np.dot(x.transpose(), error)) * -2/n).transpose() # result is (1, feat)
-        print(f"optimizeSGD: dldw: {dldw}")
+        # print(f"optimizeSGD: dldw: {dldw}")
 
         dldb = np.sum(y-yhat) * -2/n
-        print(f"optimizeSGD: dldb: {dldb}")
+        # print(f"optimizeSGD: dldb: {dldb}")
         # return (self.w - dldw/1000), (self.b - dldb/1000)
         return (self.w - self.learning_rate*dldw), (self.b - self.learning_rate*dldb)
 
@@ -151,7 +155,7 @@ class LinearRegression:
         # print(f"validate: yhat: {yhat}, y: {y}")
         return self.lossMSE(yhat, y) # determine loss
 
-    def test(self, test_x, test_y):
+    def test(self, test_x: np.ndarray):
         """
         test(x-test, y-test)   
             yhat = predict(x)
@@ -159,7 +163,8 @@ class LinearRegression:
         """
         yhat = self.predict(test_x)
         # print(f"R2: {self.R2(yhat, test_y)}")
-        return self.R2(yhat, test_y)
+        # return self.R2(yhat, test_y)
+        return yhat
 
     def R2(self, yhat: np.ndarray, y: np.ndarray):
         """
@@ -178,7 +183,7 @@ class LinearRegression:
         yhat (samp, 1)
         y (samp, 1)
         """
-        print(f"R-squared: yhat-shape: {yhat.shape}, y shape: {y.shape}, should be same")
+        # print(f"R-squared: yhat-shape: {yhat.shape}, y shape: {y.shape}, should be same")
         if yhat.shape[0] != y.shape[0]:
             print(f"R-squared: wrong shapes! should be same number of features, yhat: {yhat.shape}, y: {y.shape}")
             return
@@ -187,7 +192,7 @@ class LinearRegression:
         ssr = np.sum((yhat-ybar)**2) # regression sum of squares
         sse = np.sum((y-yhat)**2) # error sum of squares
         ssto = ssr + sse # total sum of squares
-        print(f"R-squared: sse: {sse}, ssr: {ssr}, ssto: {ssto}, test ssto: {np.sum((y-ybar)**2)}")
+        # print(f"R-squared: sse: {sse}, ssr: {ssr}, ssto: {ssto}, test ssto: {np.sum((y-ybar)**2)}")
         return ssr / ssto # r^2
 """
 (yhat-ybar)**2 + (y-yhat)**2 = (y-ybar)**2
@@ -204,20 +209,20 @@ def test_rand_1d_array():
     x = [0,0,0]
     lr = LinearRegression(0,0,0,0)
     lr.rand_1d_array(x)
-    print(f"x start [0,0,0], x now: {x}")
+    # print(f"x start [0,0,0], x now: {x}")
     return
     
 def test_rand_2d_array():
     x = [[0,0,0], [0,0,0], [0,0,0]]
     lr = LinearRegression(0,0,0,0)
     lr.rand_2d_array(x)
-    print(f"x start [[0]*3, [0]*3, [0]*3], x now: {x}")
+    # print(f"x start [[0]*3, [0]*3, [0]*3], x now: {x}")
     return
 
 if __name__ == "__main__":
     # learning_rate = 0.0001
     learning_rate = 0.0001
-    early_stop = 0.0000001
+    early_stop = 0.0001
     num_features = 3
     sample_size = 4
     lr = LinearRegression(learning_rate, early_stop, num_features, sample_size)

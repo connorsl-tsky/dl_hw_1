@@ -68,7 +68,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import keras
-from Preprocessing import preprocess, train_test_val_split, train_val_split, separate_labels
+from Preprocessing import preprocess, train_test_val_split, train_val_split, separate_labels, remove_outliers
 
 class DNN:
     def __init__(self, layers, loss, learning_rate, metrics, epochs, batch_size, early_stop=True):
@@ -105,8 +105,8 @@ class DNN:
             self.model.add(keras.layers.Dense(layer, activation='relu'))
             # what is input_dim
         self.model.add(keras.layers.Dense(1, activation="relu"))
-        print(f"DNN: init_layers: model summary:")
-        self.model.summary()
+        # print(f"DNN: init_layers: model summary:")
+        # self.model.summary()
         return 
 
     def train(self, x, y):
@@ -114,7 +114,7 @@ class DNN:
         # 1 - progress bar
         # 2 - one line per epoch
         if self.early_stop:
-            self.model.fit(
+            self.history = self.model.fit(
                 x, 
                 y, 
                 validation_split=0.2,
@@ -125,7 +125,7 @@ class DNN:
             )
             
         else:
-            self.model.fit(
+            self.history = self.model.fit(
                 x, 
                 y, 
                 validation_split=0.2,
@@ -136,9 +136,22 @@ class DNN:
         self.model.summary()
         return
 
-    def test(self, test_x):
-        print(f"DNN: test: prediction: {self.model.predict(test_x)}")
-        return
+    def test(self, test_x: pd.DataFrame):
+        """
+        test_x is dataframe with id, features, and we want to predict the y
+        what's the output?
+        for now, just an array for ids and a parallel array for predictions
+
+        splits the ids away, drops the ids from teh input, predicts based on the input df, 
+        and returns parallel arrays ids and predictions
+        """
+        # print("\n\n\n\nTEST")
+        ids = test_x['id'].to_numpy()
+        test_x = test_x.drop(columns=['id'])
+        predictions = np.array(self.model.predict(test_x)) # this returns an array
+        predictions = np.reshape(predictions, (1, predictions.shape[0]))[0]
+        # now they're both [12,3,4,,54,5]
+        return ids, predictions
 
 Y_HEADER = "TARGET_deathRate"
 
@@ -155,29 +168,35 @@ if __name__ == "__main__":
 
     train = pd.read_csv("train.csv")
     train = preprocess(train)
+    # train = remove_outliers(train)
     x, y = separate_labels(train, Y_HEADER)
-    print(f"X: {x}, y: {y}")
+    # print(f"X: {x}, y: {y}")
     # x_train, y_train, x_test, y_test, x_val, y_val = train_test_val_split(x, y, .2)
     x_train, y_train, x_test, y_test = train_val_split(x, y, .2)
+    test = pd.read_csv("test.csv")
+    test = preprocess(test)
 
     layers = [8]
     loss = 'mse'
-    # optimizer = 'sgd'
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
     epochs = 20
     batch_size = 32
     # learning_rate = 1e-12
-    learning_rate=1e-4 
+    learning_rate=1e-4
 
     """
     r2 .5 - lr 1e-4, b_s 32, epochs 20, normalization layer, early stop, no sigmoid, just an 8 layer
+
+    remove_outliers v1
+    301684 - 20, 32, 1e-8
     """
 
     dnn1 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size, early_stop=True)
     dnn1.train(x_train, y_train)
     loss, r2, mse, mae = dnn1.model.evaluate(x_test, y_test)
-    print(f"loss {loss}\nr2 {r2}\nmse {mse}\nmae {mae}")
-    print(x_train.shape)
+    print(f"\n\nTEST\nloss {loss}\nr2 {r2}\nmse {mse}\nmae {mae}")
+    dnn1.test(test)
+    # print(x_train.shape)
     # loss, acc = dnn1.model.evaluate(x_test, y_test)
     # print(f"loss {loss}, acc {acc}")
     # dnn1.test(x_test)
