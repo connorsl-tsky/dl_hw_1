@@ -84,14 +84,15 @@ class DNN:
         self.model.compile(
             loss=loss,
             optimizer=keras.optimizers.SGD(
-                learning_rate = learning_rate
+                learning_rate = learning_rate,
+                momentum=0.9
             ), 
             metrics=metrics
         )
         if early_stop:
             self.early_stop = keras.callbacks.EarlyStopping(
                 monitor="val_loss",
-                patience=3, # if not improve for 3 epochs
+                patience=15, # if not improve for 3 epochs
                 restore_best_weights=True,
                 verbose=1,
             )
@@ -100,11 +101,11 @@ class DNN:
         return 
 
     def init_layers(self):
-        self.model.add(keras.layers.BatchNormalization())
         for layer in self.layers:
-            self.model.add(keras.layers.Dense(layer, activation='relu'))
+            self.model.add(keras.layers.Dense(layer, activation='relu', kernel_regularizer=keras.regularizers.l2(1e-3)))
+            self.model.add(keras.layers.Dropout(0.2))
             # what is input_dim
-        self.model.add(keras.layers.Dense(1, activation="relu"))
+        self.model.add(keras.layers.Dense(1))
         # print(f"DNN: init_layers: model summary:")
         # self.model.summary()
         return 

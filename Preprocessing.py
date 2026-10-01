@@ -70,6 +70,13 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     # set nan to 0
     df = df.fillna(0)
 
+    # per claude suggests - these are all right skewed
+    df["avgAnnCount"] = np.log1p(df["avgAnnCount"])
+    df["avgDeathsPerYear"] = np.log1p(df["avgDeathsPerYear"])
+    df["popEst2015"] = np.log1p(df["popEst2015"])
+    df["studyPerCap"] = np.log1p(df["studyPerCap"])
+
+
     # split binnedInc ([num, num))
     # print(df["binnedInc"])
     df[["lowerBinnedInc", "upperBinnedInc"]] = df.binnedInc.str.split(",", expand=True)
@@ -87,10 +94,15 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
     # drop geo, prob don't need it
     # and the columns that have a gaps
-    df = df.drop(columns=["Geography", "PctPrivateCoverageAlone", "PctEmployed16_Over", "PctSomeCol18_24"])
+    df = df.drop(columns=["Geography", "PctSomeCol18_24"])
+    df["PctEmployed16_Over"].fillna(df["PctEmployed16_Over"].median())
+    df["PctPrivateCoverageAlone"].fillna(df["PctPrivateCoverageAlone"].median())
 
     # remove where MedianAge over 100
-    df = df.drop(df[df["MedianAge"]>100].index)
+    # df = df.drop(df[df["MedianAge"]>100].index)
+    bad_ages = df["MedianAge"] > 100
+    df.loc[bad_ages, "MedianAge"] = df.loc[bad_ages, "MedianAge"]/12 # divide by 12, bc they might be months
+
     
     """
     df.mean() to find mean
@@ -117,6 +129,29 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+def scale_inputs(x: np.ndarray) -> np.ndarray:
+    """
+    transpose
+    loop through cols and standardize and to out
+    transpose out and return
+    """
+    xT = x.transpose()
+    out = [xT[0]] # dummy first value to get dims right
+    # print("Xt, out", xT, out)
+    for feat in xT:
+        # print("feat", feat, feat.mean(), feat.std())
+        std = (feat - feat.mean()) / feat.std()
+        # print("std", std)
+        out = np.append(out, [std], axis=0)
+        # print("out", out)
+    out = out[1:] # pop first value
+    # print("outT", out.transpose())
+    return out.transpose()
+
+def scale_labels(y: np.ndarray) -> np.ndarray:
+    return (y - y.mean()) / y.std()
+
+    
 def separate_labels(df: pd.DataFrame, column: str):
     labels = df[column]
     df = df.drop(columns=[column])
@@ -226,10 +261,15 @@ def remove_outliers(df: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    train = pd.read_csv("train.csv", na_values=[0.0])
-    print(train.isnull().sum())
-    train = preprocess(train)
-    analyze(train)
+    x = np.array([[1,20,300],[2,10,200],[3,30,100]])
+    y = np.array([[100],[150],[125]])
+    # print(scale_inputs(x))
+    print(scale_labels(y))
+
+    # train = pd.read_csv("train.csv", na_values=[0.0])
+    # print(train.isnull().sum())
+    # train = preprocess(train)
+    # analyze(train)
 
     # dict = {"A": [3,3,3,100], "B": [2,2,2,2], "C": [100,3,3,3]}
     # df = pd.DataFrame(dict)

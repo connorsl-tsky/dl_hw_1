@@ -1,5 +1,5 @@
 import pandas as pd
-from Preprocessing import preprocess, train_val_split, train_test_val_split, separate_labels, separate_labels_ids, separate_labels_ids_test
+from Preprocessing import preprocess, train_val_split, train_test_val_split, separate_labels, separate_labels_ids, separate_labels_ids_test, scale_inputs, scale_labels
 from LinearRegression import LinearRegression
 from DNN import DNN
 import keras
@@ -177,7 +177,7 @@ def plot(lr_loss, dnn1_loss, dnn2_loss, dnn3_loss, dnn4_loss, dnn5_loss):
     dnn3_epochs = range(1, len(dnn3_loss)+1)
     dnn4_epochs = range(1, len(dnn4_loss)+1)
     dnn5_epochs = range(1, len(dnn5_loss)+1)
-    # plt.plot(lr_epochs, lr_loss, label="Linear Regression")
+    plt.plot(lr_epochs, lr_loss, label="Linear Regression")
     plt.plot(dnn1_epochs, dnn1_loss, label="DNN1 - 8 - Output")
     plt.plot(dnn2_epochs, dnn2_loss, label="DNN2 - 16 - 8 - Output")
     plt.plot(dnn3_epochs, dnn3_loss, label="DNN3 - 16 - 8 - 4 - Output")
@@ -200,15 +200,19 @@ def main_test_2():
 
     data = pd.read_csv("train.csv")
     data = preprocess(data)
+    data = data.reindex(np.random.permutation(data.index)) # shuffle
     train_ids, x, y = separate_labels_ids(data, Y_HEADER)
+    x = scale_inputs(x)
+    y = scale_labels(y)
     # pretty sure we don't need the ids
-    x_train_lr, y_train_lr, x_test, y_test, x_val_lr, y_val_lr = train_test_val_split(x, y, 0.2) 
+    x_train_lr, y_train_lr, x_test, y_test, x_val_lr, y_val_lr = train_test_val_split(x, y, 0.2)
     x_train = np.append(x_train_lr, x_val_lr, axis=0)
     y_train = np.append(y_train_lr, y_val_lr, axis=0)
 
     # lr_learning_rate = 1e-12
     # lr_learning_rate = 5e-12
-    lr_learning_rate = 5e-12
+    # lr_learning_rate = 5e-12
+    lr_learning_rate=1e-2
     # lr_early_stop = 0.001
     lr_early_stop = 40
     lr_num_features = x_train_lr.shape[1]
@@ -216,16 +220,9 @@ def main_test_2():
     lr = LinearRegression(lr_learning_rate, lr_early_stop, lr_num_features, lr_sample_size)
     lr_loss = lr.train(x_train_lr, y_train_lr, x_val_lr, y_val_lr)
     # predictions
+    lr_bias, lr_var = bias_variance(lr, x_train, y_train, x_test, y_test)
     predictions = lr.test(x_test)
-    pred_mean = predictions.mean(axis=0)
-    lr_test_bias = ((y_test - pred_mean)**2).mean()
-    lr_test_var = predictions.var(axis=0).mean()
     lr_r2 = lr.R2(predictions, y_test)
-
-    predictions = lr.test(x_train)
-    pred_mean = predictions.mean(axis=0)
-    lr_train_bias = ((y_train - pred_mean)**2).mean()
-    lr_train_var = predictions.var(axis=0).mean()
     
 
     # output
@@ -240,122 +237,90 @@ def main_test_2():
 
     # DNN 8 out
     layers = [8]
-    # loss = 'mse'
-    loss = 'mae'
-    learning_rate=1e-4
+    loss = 'mse'
+    # loss = 'mae'
+    # learning_rate = 1e-4
+    learning_rate=1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    epochs = 20
+    # epochs = 20
+    epochs = 200
     batch_size = 32
     
     dnn1 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
     dnn1.train(x_train, y_train)
 
-    predictions = np.array(dnn1.model.predict(x_test))
-    pred_mean = predictions.mean(axis=0)
-    dnn1_test_bias = ((y_test - pred_mean)**2).mean()
-    dnn1_test_var = predictions.var(axis=0).mean()
-
-    predictions = np.array(dnn1.model.predict(x_train))
-    pred_mean = predictions.mean(axis=0)
-    dnn1_train_bias = ((y_train - pred_mean)**2).mean()
-    dnn1_train_var = predictions.var(axis=0).mean()
-
+    dnn1_bias, dnn1_var = bias_variance(dnn1.model, x_train, y_train, x_test, y_test)
     dnn1_l, dnn1_r2, dnn1_mse, dnn1_mae = dnn1.model.evaluate(x_test, y_test)
 
     
     # DNN 16 8 out
     layers = [16, 8]
     # loss = 'mse'
-    learning_rate=1e-4
+    # learning_rate=1e-4
+    learning_rate = 1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    epochs = 20
+    # epochs = 20
+    epochs = 200
     batch_size = 32
     
     dnn2 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
     dnn2.train(x_train, y_train)
 
-    predictions = np.array(dnn2.model.predict(x_test))
-    pred_mean = predictions.mean(axis=0)
-    dnn2_test_bias = ((y_test - pred_mean)**2).mean()
-    dnn2_test_var = predictions.var(axis=0).mean()
-
-    predictions = np.array(dnn2.model.predict(x_train))
-    pred_mean = predictions.mean(axis=0)
-    dnn2_train_bias = ((y_train - pred_mean)**2).mean()
-    dnn2_train_var = predictions.var(axis=0).mean()
-
+    dnn2_bias, dnn2_var = bias_variance(dnn2.model, x_train, y_train, x_test, y_test)
     dnn2_l, dnn2_r2, dnn2_mse, dnn2_mae = dnn2.model.evaluate(x_test, y_test)
 
 
     # DNN 16 8 4 out
     layers = [16, 8, 4]
     # loss = 'mse'
-    learning_rate=1e-4
+    # learning_rate=1e-4
+    learning_rate = 1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    epochs = 20
+    # epochs = 20
+    epochs = 200
     batch_size = 32
     
     dnn3 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
     dnn3.train(x_train, y_train)
 
-    predictions = np.array(dnn3.model.predict(x_test))
-    pred_mean = predictions.mean(axis=0)
-    dnn3_test_bias = ((y_test - pred_mean)**2).mean()
-    dnn3_test_var = predictions.var(axis=0).mean()
-
-    predictions = np.array(dnn3.model.predict(x_train))
-    pred_mean = predictions.mean(axis=0)
-    dnn3_train_bias = ((y_train - pred_mean)**2).mean()
-    dnn3_train_var = predictions.var(axis=0).mean()
-
+    
+    dnn3_bias, dnn3_var = bias_variance(dnn3.model, x_train, y_train, x_test, y_test)
     dnn3_l, dnn3_r2, dnn3_mse, dnn3_mae = dnn3.model.evaluate(x_test, y_test)
 
 
     # DNN 30 16 8 4 out
     layers = [30, 16, 8, 4]
     # loss = 'mse'
-    learning_rate=1e-5
+    # learning_rate=1e-5
+    learning_rate = 1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    epochs = 20
+    # epochs = 20
+    epochs = 200
     batch_size = 32
     
     dnn4 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
     dnn4.train(x_train, y_train)
 
-    predictions = np.array(dnn4.model.predict(x_test))
-    pred_mean = predictions.mean(axis=0)
-    dnn4_test_bias = ((y_test - pred_mean)**2).mean()
-    dnn4_test_var = predictions.var(axis=0).mean()
-
-    predictions = np.array(dnn4.model.predict(x_train))
-    pred_mean = predictions.mean(axis=0)
-    dnn4_train_bias = ((y_train - pred_mean)**2).mean()
-    dnn4_train_var = predictions.var(axis=0).mean()
-
+    
+    dnn4_bias, dnn4_var = bias_variance(dnn4.model, x_train, y_train, x_test, y_test)
     dnn4_l, dnn4_r2, dnn4_mse, dnn4_mae = dnn4.model.evaluate(x_test, y_test)
 
 
     # DNN 8 8 out
     layers = [8, 8]
     # loss = 'mse'
-    learning_rate=1e-5
+    # learning_rate=1e-5
+    learning_rate = 1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    epochs = 20
+    # epochs = 20
+    epochs = 200
     batch_size = 32
     
     dnn5 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
     dnn5.train(x_train, y_train)
 
-    predictions = np.array(dnn5.model.predict(x_test))
-    pred_mean = predictions.mean(axis=0)
-    dnn5_test_bias = ((y_test - pred_mean)**2).mean()
-    dnn5_test_var = predictions.var(axis=0).mean()
-
-    predictions = np.array(dnn5.model.predict(x_train))
-    pred_mean = predictions.mean(axis=0)
-    dnn5_train_bias = ((y_train - pred_mean)**2).mean()
-    dnn5_train_var = predictions.var(axis=0).mean()
-
+    
+    dnn5_bias, dnn5_var = bias_variance(dnn5.model, x_train, y_train, x_test, y_test)
     dnn5_l, dnn5_r2, dnn5_mse, dnn5_mae = dnn5.model.evaluate(x_test, y_test)
 
 
@@ -365,10 +330,8 @@ def main_test_2():
     want both to be moderate
     """
     print("\tLR\tDNN1\tDNN2\tDNN3\tDNN4\tDNN5")
-    print(f"TRBIAS:\t{lr_train_bias:.2f}\t{dnn1_train_bias:.2f}\t{dnn2_train_bias:.2f}\t{dnn3_train_bias:.2f}\t{dnn4_train_bias:.2f}\t{dnn5_train_bias:.2f}")
-    print(f"TRVAR:\t{lr_train_var:.2f}\t{dnn1_train_var:.2f}\t{dnn2_train_var:.2f}\t{dnn3_train_var:.2f}\t{dnn4_train_var:.2f}\t{dnn5_train_var:.2f}")
-    print(f"TEBIAS:\t{lr_test_bias:.2f}\t{dnn1_test_bias:.2f}\t{dnn2_test_bias:.2f}\t{dnn3_test_bias:.2f}\t{dnn4_test_bias:.2f}\t{dnn5_test_bias:.2f}")
-    print(f"TEVAR:\t{lr_test_var:.2f}\t{dnn1_test_var:.2f}\t{dnn2_test_var:.2f}\t{dnn3_test_var:.2f}\t{dnn4_test_var:.2f}\t{dnn5_test_var:.2f}")
+    print(f"BIAS:\t{lr_bias:.2f}\t{dnn1_bias:.2f}\t{dnn2_bias:.2f}\t{dnn3_bias:.2f}\t{dnn4_bias:.2f}\t{dnn5_bias:.2f}")
+    print(f"VAR:\t{lr_var:.2f}\t{dnn1_var:.2f}\t{dnn2_var:.2f}\t{dnn3_var:.2f}\t{dnn4_var:.2f}\t{dnn5_var:.2f}")
     print()
     print("TEST R2")
     print("LR\tDNN1\tDNN2\tDNN3\tDNN4\tDNN5")
@@ -383,6 +346,31 @@ def main_test_2():
     plot(lr_loss, dnn1_loss, dnn2_loss, dnn3_loss, dnn4_loss, dnn5_loss)
 
     return
+
+def bias_variance(model, x_train, y_train, x_test, y_test, runs=30):
+    """
+    copied and modified from gfg
+    https://www.geeksforgeeks.org/machine-learning/bias-vs-variance-in-machine-learning/
+    very similar to the one claude recommended
+    """
+
+    preds = []
+    n = x_train.shape[0]
+    for _ in range(runs):
+        idx = np.random.choice(n, n, replace=True)
+        x_sample = x_train[idx]
+        y_sample = y_train[idx]
+        model.fit(x_sample, y_sample)
+        preds.append(model.predict(x_test))
+    
+    preds = np.array(preds)
+    y_pred_mean = preds.mean(axis=0)
+    
+    bias_sq = ((y_test - y_pred_mean)**2).mean()
+    variance = preds.var(axis=0).mean()
+    total_error = bias_sq + variance
+    
+    return bias_sq, variance#, total_error
 
 """
 TDL 9/30/26
@@ -400,16 +388,22 @@ TDL 9/30/26
     - *calculate bias and variance for all models - 308pm
     - *bias and var for training to compare - 315pm shoulda made a function :(
     - *calculate r2 for each model
-    - run AI on this stuff
-- add my own model and resubmit pictures
-- re-answer the data questions and make them better
+break for dinner and class
+- *add my own model and resubmit pictures - 505pm
+- *re-answer the data questions and make them better
 - AI report 
+    - *scale features
+    - *fix DNN
+    - *fix R2
+    - *fix median age
+    - *update bias/variance 
+    - *smaller issues + after the previous fixes
+wow that made things a lot better
+- send email, about if kaggle needs to be reopened?
+- continue chatting with AI to find something that was wrong - maybe ask more targeted questions
+- update report - include pre and post AI
 - best model weights
-- l1/l2 regularization?
-- tune hyperparameters
-
-not going to add MAE for LR. i'll take the L
-
+- function for best model to output submission
 
 """
 

@@ -15,7 +15,7 @@ class LinearRegression:
         # self.w = np.array([[3.5,3.5,5.5]])
         self.w = np.array([[0] * num_features]) # w is horizontal
         # self.b = 1.5
-        self.b = random.randint(1,10)
+        self.b = 0 #random.randint(1,10)
 
         # self.rand_h_vector(self.w)
         # self.rand_v_vector(self.b)
@@ -76,6 +76,12 @@ class LinearRegression:
         # print(f"train: FINAL MODEL: w: {self.w}, b: {self.b}")
         print(f"final loss: {curr_error}, num runs: {count}")
         return loss
+
+    def fit(self, x_train, y_train):
+        # this is for bias_variance
+        # i know this is probably a bit wonky, but whatever
+        return self.train(x_train, y_train, x_train, y_train)
+    
 
     def predict(self, x: np.ndarray) -> np.ndarray:
         """
@@ -189,11 +195,11 @@ class LinearRegression:
             return
         ybar = np.average(y)
 
-        ssr = np.sum((yhat-ybar)**2) # regression sum of squares
+        # ssr = np.sum((yhat-ybar)**2) # regression sum of squares
         sse = np.sum((y-yhat)**2) # error sum of squares
-        ssto = ssr + sse # total sum of squares
+        ssto = np.sum((y-ybar)**2) # total sum of squares
         # print(f"R-squared: sse: {sse}, ssr: {ssr}, ssto: {ssto}, test ssto: {np.sum((y-ybar)**2)}")
-        return ssr / ssto # r^2
+        return 1 - sse/ssto # r^2
 """
 (yhat-ybar)**2 + (y-yhat)**2 = (y-ybar)**2
 yhat**2-ybaryhar+ybar**2 + y**2-yyhat+yhat**2 = y**2-yybar+ybar**2
