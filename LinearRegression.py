@@ -12,13 +12,9 @@ class LinearRegression:
         self.learning_rate = learning_rate
         self.early_stop = early_stop
 
-        # self.w = np.array([[3.5,3.5,5.5]])
-        self.w = np.array([[0] * num_features]) # w is horizontal
-        # self.b = 1.5
-        self.b = 0 #random.randint(1,10)
+        self.w = np.array([[0] * num_features])
+        self.b = 0 
 
-        # self.rand_h_vector(self.w)
-        # self.rand_v_vector(self.b)
         # print(f"init: rand w: {self.w}, rand b: {self.b} ")
         return
 
@@ -175,17 +171,14 @@ class LinearRegression:
     def R2(self, yhat: np.ndarray, y: np.ndarray):
         """
         computeR2(x, y) -> float 
-        """
-        """
+
+        https://online.stat.psu.edu/stat462/node/131/ 
         https://online.stat.psu.edu/stat462/node/95/
         SSR = regression sum of squares =  sum((yhat-ybar)^2)
         SSE = error sum of squares = sum((y-yhat)^2)
         SSTO = total sum of squares = sum((y-ybar)^2)
         SSTO = SSR + SSE
         R^2 = SSR/SSTO = 1-SSE/SSTO
-        https://online.stat.psu.edu/stat462/node/131/ 
-        adj r2 = 1-((n-1)/(n-(k+1)))(1-R^2) - but we might not calculate it
-        idk
         yhat (samp, 1)
         y (samp, 1)
         """
@@ -200,15 +193,6 @@ class LinearRegression:
         ssto = np.sum((y-ybar)**2) # total sum of squares
         # print(f"R-squared: sse: {sse}, ssr: {ssr}, ssto: {ssto}, test ssto: {np.sum((y-ybar)**2)}")
         return 1 - sse/ssto # r^2
-"""
-(yhat-ybar)**2 + (y-yhat)**2 = (y-ybar)**2
-yhat**2-ybaryhar+ybar**2 + y**2-yyhat+yhat**2 = y**2-yybar+ybar**2
-
-2yhat**2 - ybaryhat - yyhat + ybar**2 + y**2 = y**2 - yybar + ybar**2
-
-2yhat**2 - ybaryhat - yyhat + yybar = 0
-hm?
-"""
 
 def test_rand_1d_array():
     
@@ -226,7 +210,6 @@ def test_rand_2d_array():
     return
 
 if __name__ == "__main__":
-    # learning_rate = 0.0001
     learning_rate = 0.0001
     early_stop = 0.0001
     num_features = 3
@@ -234,6 +217,7 @@ if __name__ == "__main__":
     lr = LinearRegression(learning_rate, early_stop, num_features, sample_size)
 
     """
+    test data:
     w1 = 3, w2 = 4, w3 = 5, b = 2
     123 - 28, 456 - 64, 789 - 100, 101112 - 136
     131415 - 172 161718 - 208, 192021 - 244, 222324 - 280 

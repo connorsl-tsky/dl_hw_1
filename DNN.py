@@ -1,67 +1,5 @@
-
-
-
 """
 https://www.geeksforgeeks.org/deep-learning/neural-networks-a-beginners-guide/
-import numpy as np
-import pandas as pd
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-
-data = {
-    'feature1': [0.1, 0.2, 0.3, 0.4, 0.5],
-    'feature2': [0.5, 0.4, 0.3, 0.2, 0.1],
-    'label': [0, 0, 1, 1, 1]
-}
-
-df = pd.DataFrame(data)
-X = df[['feature1', 'feature2']].values
-y = df['label'].values
-
-model = Sequential()
-model.add(Dense(8, input_dim=2, activation='relu'))
-model.add(Dense(1, activation='sigmoid'))
-
-sequential is the newtork, dense is the layer
-8 i think is the number of nodes
-
-model.compile(loss='binary_crossentropy',
-              optimizer='adam', metrics=['accuracy'])
-loss, optimizer, and metrics
-
-model.fit(X, y, epochs=100, batch_size=1, verbose=1)
-
-test_data = np.array([[0.2, 0.4]])
-prediction = model.predict(test_data)
-predicted_label = (prediction > 0.5).astype(int)
-
-what were the specs that she outlined?
-sgd for the optimizer and mse for the loss
-8 - output
-16 - 8 - output
-16 - 8 - 4 - output
-30 - 16 - 8 - 4 - output
-
-
-design
-DNN(layers=[30,16,8,4], loss='mse', optimizer='sgd', metrics='', epochs, batch_size)
-train(x, y)
-test(x)
-
-how do i use a validation set for a Sequential?
-see the early stopping i think
-what are the Sequential.compile() options?
-'sgd'
-'meansquarederror'
-'r2score'
-'accuracy'
-'precision'
-
-how do i use tensorflow
-model.summary() to see a summary of the lyaers
-
-things to do later
-maybe use EarlyStopping
 """
 
 import numpy as np
@@ -105,14 +43,14 @@ class DNN:
             # self.model.add(keras.layers.Dense(layer, activation='relu', kernel_regularizer=keras.regularizers.l1_l2(l1=1e-3, l2=1e-3)))
             self.model.add(keras.layers.Dense(layer, activation='relu', kernel_regularizer=keras.regularizers.l2(1e-3)))
             self.model.add(keras.layers.Dropout(0.2))
-            # what is input_dim
         self.model.add(keras.layers.Dense(1))
         # print(f"DNN: init_layers: model summary:")
         # self.model.summary()
         return 
 
     def train(self, x, y):
-        # verbose 0 - no
+        # verbose 
+        # 0 - no
         # 1 - progress bar
         # 2 - one line per epoch
         if self.early_stop:
@@ -152,7 +90,6 @@ class DNN:
         test_x = test_x.drop(columns=['id'])
         predictions = np.array(self.model.predict(test_x)) # this returns an array
         predictions = np.reshape(predictions, (1, predictions.shape[0]))[0]
-        # now they're both [12,3,4,,54,5]
         return ids, predictions
 
 Y_HEADER = "TARGET_deathRate"

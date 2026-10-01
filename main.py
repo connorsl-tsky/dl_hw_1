@@ -8,69 +8,9 @@ import matplotlib.pyplot as plt
 
 Y_HEADER = "TARGET_deathRate"
 
-def main_lr():
-    train = pd.read_csv("train.csv")
-    train = preprocess(train)
-    x_train, y_train = separate_labels(train, Y_HEADER)
-    x_train, y_train, x_val, y_val = train_val_split(x_train, y_train, .2)
-
-    """
-    early stop 0.9
-    1e-13 1673, 1581, 1504, 1519
-    1e-12 252, 384, 325, 248, 238, 414, 235
-        XXX all of these lead to infinite values
-        1e-11 669, 543, 524, 510, 519
-        1e-10 106, 110, 106, 122 109
-        1e-9 67, 63, 63, 63
-        1e-8 45, 45, 45
-        1e-7 35, 35, 37
-        1e-6 29, 29, 29
-        1e-5 25, 25, 25
-        1e-4 22, 22, 22, 
-
-    early stop 0.1 
-    1e-13 - 3218, 3664, 2466, 2229, 2918
-    1e-12 - 4290, 4311, 4814, 5008, 3838
-
-    es 0.01
-    1e-13 - 49299
-    1e-12 - 8944 i think 1e-12 is generally better
-    """
-
-    learning_rate = 1e-13
-    early_stop = 0.1
-    num_features = x_train.shape[1]
-    sample_size = x_train.shape[0]
-    lr = LinearRegression(learning_rate, early_stop, num_features, sample_size)
-    num_runs = lr.train(x_train, y_train, x_val, y_val)
-    print(f"MAIN DONE: num_runs: {num_runs}")
-
-def main_test():
-    train = pd.read_csv("train.csv")
-    train = preprocess(train)
-    train_ids, x, y = separate_labels_ids(train, Y_HEADER)
-    x_train, y_train, x_val, y_val = train_val_split(x, y, .2)
-    test = pd.read_csv("test.csv")
-    test = preprocess(test)
-    test_ids, x_test = separate_labels_ids_test(test)
-
-
-    learning_rate = 1e-13
-    # early_stop = 0.001
-    early_stop = 0.1
-    num_features = x_train.shape[1]
-    sample_size = x_train.shape[0]
-    lr = LinearRegression(learning_rate, early_stop, num_features, sample_size)
-    num_runs = lr.train(x_train, y_train, x_val, y_val)
-    print(f"MAIN TEST DONE: num_runs: {num_runs}")
-    yhat = lr.test(x_test)
-    yhat = np.reshape(yhat, (1, yhat.shape[0]))[0]
-    # print(f"MAIN TEST R-Squared: {R2}")
-    print(test_ids.to_numpy(), yhat)
-
 def main():
     """
-    all 5 models
+    just dnn1 - my best model
     trains on train.csv, and outputs predictions and plots to test.csv
     """
 
@@ -87,20 +27,8 @@ def main():
     y_train = scale_labels(y_train)
     test_ids, x_test = separate_labels_ids_test(test)
     x_test = scale_inputs(x_test)
-    x_train_lr, y_train_lr, x_val_lr, y_val_lr = train_val_split(x_train, y_train, 0.2) 
 
     learning_rate = 1e-2
-    # lr_early_stop = 200
-    # lr_num_features = x_train.shape[1]
-    # lr_sample_size = x_train.shape[0]
-    # lr = LinearRegression(learning_rate, lr_early_stop, lr_num_features, lr_sample_size)
-    # lr_loss = lr.train(x_train_lr, y_train_lr, x_val_lr, y_val_lr)
-    # # predictions
-    # predictions = lr.test(x_test)
-    # predictions = np.reshape(predictions, (1, predictions.shape[0]))[0]
-    # test_ids = test_ids.to_numpy()
-    # # output
-    # output(test_ids, predictions, "lr_submission.csv")
 
     # DNN 8 out
     layers = [8]
@@ -120,60 +48,6 @@ def main():
     output(ids, predictions, "dnn1_submission.csv")
     dnn1.model.save('weights.keras')
     
-    # # DNN 16 8 out
-    # layers = [16, 8]
-    # # loss = 'mse'
-    # metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    
-    # dnn2 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
-    # dnn2.train(x_train, y_train)
-
-    # # ids, predictions = dnn2.test(test)
-    # # output(ids, predictions, "dnn2_submission.csv")
-
-    # # DNN 16 8 4 out
-    # layers = [16, 8, 4]
-    # metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    # batch_size = 32
-    
-    # dnn3 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
-    # dnn3.train(x_train, y_train)
-
-    # # ids, predictions = dnn3.test(test)
-    # # output(ids, predictions, "dnn3_submission.csv")
-
-    # # DNN 30 16 8 4 out
-    # layers = [30, 16, 8, 4]
-    # metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    # batch_size = 32
-    
-    # dnn4 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
-    # dnn4.train(x_train, y_train)
-
-    # # ids, predictions = dnn4.test(test)
-    # # output(ids, predictions, "dnn4_submission.csv")
-
-    # # DNN 8 8 out
-    # layers = [8, 8]
-    # # loss = 'mse'
-    # # learning_rate=1e-5
-    # learning_rate = 1e-2
-    # metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    # # epochs = 20
-    # epochs = 200
-    # batch_size = 32
-    
-    # dnn5 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
-    # dnn5.train(x_train, y_train)
-
-    # # # plot
-    # dnn1_loss = dnn1.history.history['loss']
-    # dnn2_loss = dnn2.history.history['loss']
-    # dnn3_loss = dnn3.history.history['loss']
-    # dnn4_loss = dnn4.history.history['loss']
-    # dnn5_loss = dnn5.history.history['loss']
-    # plot(lr_loss, dnn1_loss, dnn2_loss, dnn3_loss, dnn4_loss, dnn5_loss)
-
     return
 
 def output(ids, labels, filename):
@@ -182,9 +56,6 @@ def output(ids, labels, filename):
     return
 
 def plot(lr_loss, dnn1_loss, dnn2_loss, dnn3_loss, dnn4_loss, dnn5_loss):
-    """
-    i think these can be arrays of losses
-    """
     lr_epochs = range(1, len(lr_loss)+1)
     dnn1_epochs = range(1, len(dnn1_loss)+1)
     dnn2_epochs = range(1, len(dnn2_loss)+1)
@@ -203,7 +74,7 @@ def plot(lr_loss, dnn1_loss, dnn2_loss, dnn3_loss, dnn4_loss, dnn5_loss):
     plt.show()
     return
 
-def main_test_2():
+def main_test():
     """
     all 5 models
     but we only use train.csv
@@ -218,16 +89,11 @@ def main_test_2():
     train_ids, x, y = separate_labels_ids(data, Y_HEADER)
     x = scale_inputs(x)
     y = scale_labels(y)
-    # pretty sure we don't need the ids
     x_train_lr, y_train_lr, x_test, y_test, x_val_lr, y_val_lr = train_test_val_split(x, y, 0.2)
     x_train = np.append(x_train_lr, x_val_lr, axis=0)
     y_train = np.append(y_train_lr, y_val_lr, axis=0)
 
-    # lr_learning_rate = 1e-12
-    # lr_learning_rate = 5e-12
-    # lr_learning_rate = 5e-12
     lr_learning_rate=1e-2
-    # lr_early_stop = 0.001
     lr_epochs = 200 # yes i know the parameter in the constructor is called early_stop not epochs, i don't want to change it
     lr_num_features = x_train_lr.shape[1]
     lr_sample_size = x_train_lr.shape[0]
@@ -237,25 +103,16 @@ def main_test_2():
     lr_bias, lr_var = bias_variance(lr, x_train, y_train, x_test, y_test)
     predictions = lr.test(x_test)
     lr_r2 = lr.R2(predictions, y_test)
-    
-
-    # output
 
     """
     https://www.geeksforgeeks.org/machine-learning/bias-vs-variance-in-machine-learning/
-    preds = np.array(preds)
-    y_pred_mean = preds.mean(axis=0)
-    bias_sq = ((y_test - y_pred_mean)**2).mean()
-    variance = preds.var(axis=0).mean()
     """
 
     # DNN 8 out
     layers = [8]
     loss = 'mse'
-    # learning_rate = 1e-4
     learning_rate=1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    # epochs = 20
     epochs = 200
     batch_size = 32
     
@@ -268,11 +125,8 @@ def main_test_2():
     
     # DNN 16 8 out
     layers = [16, 8]
-    # loss = 'mse'
-    # learning_rate=1e-4
     learning_rate = 1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    # epochs = 20
     epochs = 200
     batch_size = 32
     
@@ -285,11 +139,8 @@ def main_test_2():
 
     # DNN 16 8 4 out
     layers = [16, 8, 4]
-    # loss = 'mse'
-    # learning_rate=1e-4
     learning_rate = 1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    # epochs = 20
     epochs = 200
     batch_size = 32
     
@@ -303,11 +154,8 @@ def main_test_2():
 
     # DNN 30 16 8 4 out
     layers = [30, 16, 8, 4]
-    # loss = 'mse'
-    # learning_rate=1e-5
     learning_rate = 1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    # epochs = 20
     epochs = 200
     batch_size = 32
     
@@ -321,11 +169,8 @@ def main_test_2():
 
     # DNN 8 8 out
     layers = [8, 8]
-    # loss = 'mse'
-    # learning_rate=1e-5
     learning_rate = 1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    # epochs = 20
     epochs = 200
     batch_size = 32
     
@@ -357,12 +202,6 @@ def main_test_2():
     dnn4_loss = dnn4.history.history['loss']
     dnn5_loss = dnn5.history.history['loss']
     plot(lr_loss, dnn1_loss, dnn2_loss, dnn3_loss, dnn4_loss, dnn5_loss)
-
-    # my best model is generally dnn1
-    # save weights
-    dnn1.model.save('weights.txt')
-    # create submission.csv
-
 
     return
 
