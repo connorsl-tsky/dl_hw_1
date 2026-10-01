@@ -67,7 +67,7 @@ states = {
 }
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
-    # set nan to 0
+    # set nan to 0, just in case
     df = df.fillna(0)
 
     # per claude suggests - these are all right skewed

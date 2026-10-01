@@ -102,6 +102,7 @@ class DNN:
 
     def init_layers(self):
         for layer in self.layers:
+            # self.model.add(keras.layers.Dense(layer, activation='relu', kernel_regularizer=keras.regularizers.l1_l2(l1=1e-3, l2=1e-3)))
             self.model.add(keras.layers.Dense(layer, activation='relu', kernel_regularizer=keras.regularizers.l2(1e-3)))
             self.model.add(keras.layers.Dropout(0.2))
             # what is input_dim

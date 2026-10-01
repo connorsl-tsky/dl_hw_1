@@ -78,33 +78,35 @@ def main():
     test = pd.read_csv("test.csv")
     train = preprocess(train)
     test = preprocess(test)
+    train = train.reindex(np.random.permutation(train.index)) # shuffle
+    test = test.reindex(np.random.permutation(test.index)) # shuffle
     train_ids, x_train, y_train = separate_labels_ids(train, Y_HEADER)
+    x_train = scale_inputs(x_train)
+    y_mean = y_train.mean()
+    y_std = y_train.std()
+    y_train = scale_labels(y_train)
     test_ids, x_test = separate_labels_ids_test(test)
+    x_test = scale_inputs(x_test)
     x_train_lr, y_train_lr, x_val_lr, y_val_lr = train_val_split(x_train, y_train, 0.2) 
 
-    # lr_learning_rate = 1e-12
-    # lr_learning_rate = 5e-12
-    lr_learning_rate = 5e-12
-    # lr_early_stop = 0.001
-    lr_early_stop = 20
-    lr_num_features = x_train.shape[1]
-    lr_sample_size = x_train.shape[0]
-    lr = LinearRegression(lr_learning_rate, lr_early_stop, lr_num_features, lr_sample_size)
-    lr_loss = lr.train(x_train_lr, y_train_lr, x_val_lr, y_val_lr)
-    # predictions
-    predictions = lr.test(x_test)
-    predictions = np.reshape(predictions, (1, predictions.shape[0]))[0]
-    test_ids = test_ids.to_numpy()
-    # output
-    output(test_ids, predictions, "lr_submission.csv")
+    learning_rate = 1e-2
+    # lr_early_stop = 200
+    # lr_num_features = x_train.shape[1]
+    # lr_sample_size = x_train.shape[0]
+    # lr = LinearRegression(learning_rate, lr_early_stop, lr_num_features, lr_sample_size)
+    # lr_loss = lr.train(x_train_lr, y_train_lr, x_val_lr, y_val_lr)
+    # # predictions
+    # predictions = lr.test(x_test)
+    # predictions = np.reshape(predictions, (1, predictions.shape[0]))[0]
+    # test_ids = test_ids.to_numpy()
+    # # output
+    # output(test_ids, predictions, "lr_submission.csv")
 
     # DNN 8 out
     layers = [8]
-    # loss = 'mse'
-    loss = 'mae'
-    learning_rate=1e-4
+    loss = 'mse'
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    epochs = 20
+    epochs = 200
     batch_size = 32
     
     dnn1 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
@@ -112,56 +114,68 @@ def main():
     # test
 
     ids, predictions = dnn1.test(test)
+    predictions = dnn1.model.predict(x_test)
+    predictions = np.reshape(predictions, (1, predictions.shape[0]))[0]
+    predictions = (predictions * y_std) + y_mean # unscale predictions
     output(ids, predictions, "dnn1_submission.csv")
+    dnn1.model.save('weights.keras')
     
-    # DNN 16 8 out
-    layers = [16, 8]
-    # loss = 'mse'
-    learning_rate=1e-4
-    metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    epochs = 20
-    batch_size = 32
+    # # DNN 16 8 out
+    # layers = [16, 8]
+    # # loss = 'mse'
+    # metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
     
-    dnn2 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
-    dnn2.train(x_train, y_train)
+    # dnn2 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
+    # dnn2.train(x_train, y_train)
 
-    ids, predictions = dnn2.test(test)
-    output(ids, predictions, "dnn2_submission.csv")
+    # # ids, predictions = dnn2.test(test)
+    # # output(ids, predictions, "dnn2_submission.csv")
 
-    # DNN 16 8 4 out
-    layers = [16, 8, 4]
-    # loss = 'mse'
-    learning_rate=1e-4
-    metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    epochs = 20
-    batch_size = 32
+    # # DNN 16 8 4 out
+    # layers = [16, 8, 4]
+    # metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
+    # batch_size = 32
     
-    dnn3 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
-    dnn3.train(x_train, y_train)
+    # dnn3 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
+    # dnn3.train(x_train, y_train)
 
-    ids, predictions = dnn3.test(test)
-    output(ids, predictions, "dnn3_submission.csv")
+    # # ids, predictions = dnn3.test(test)
+    # # output(ids, predictions, "dnn3_submission.csv")
 
-    # DNN 30 16 8 4 out
-    layers = [30, 16, 8, 4]
-    # loss = 'mse'
-    learning_rate=1e-5
-    metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
-    epochs = 20
-    batch_size = 32
+    # # DNN 30 16 8 4 out
+    # layers = [30, 16, 8, 4]
+    # metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
+    # batch_size = 32
     
-    dnn4 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
-    dnn4.train(x_train, y_train)
+    # dnn4 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
+    # dnn4.train(x_train, y_train)
 
-    ids, predictions = dnn4.test(test)
-    output(ids, predictions, "dnn4_submission.csv")
+    # # ids, predictions = dnn4.test(test)
+    # # output(ids, predictions, "dnn4_submission.csv")
 
-    dnn1_loss = dnn1.history.history['loss']
-    dnn2_loss = dnn2.history.history['loss']
-    dnn3_loss = dnn3.history.history['loss']
-    dnn4_loss = dnn4.history.history['loss']
-    plot(lr_loss, dnn1_loss, dnn2_loss, dnn3_loss, dnn4_loss)
-         
+    # # DNN 8 8 out
+    # layers = [8, 8]
+    # # loss = 'mse'
+    # # learning_rate=1e-5
+    # learning_rate = 1e-2
+    # metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
+    # # epochs = 20
+    # epochs = 200
+    # batch_size = 32
+    
+    # dnn5 = DNN(layers, loss, learning_rate, metrics, epochs, batch_size)
+    # dnn5.train(x_train, y_train)
+
+    # # # plot
+    # dnn1_loss = dnn1.history.history['loss']
+    # dnn2_loss = dnn2.history.history['loss']
+    # dnn3_loss = dnn3.history.history['loss']
+    # dnn4_loss = dnn4.history.history['loss']
+    # dnn5_loss = dnn5.history.history['loss']
+    # plot(lr_loss, dnn1_loss, dnn2_loss, dnn3_loss, dnn4_loss, dnn5_loss)
+
+    return
+
 def output(ids, labels, filename):
     outdf = pd.DataFrame({"id": ids, "TARGET_deathRate": labels})
     outdf.to_csv(filename, index=False)
@@ -214,10 +228,10 @@ def main_test_2():
     # lr_learning_rate = 5e-12
     lr_learning_rate=1e-2
     # lr_early_stop = 0.001
-    lr_early_stop = 40
+    lr_epochs = 200 # yes i know the parameter in the constructor is called early_stop not epochs, i don't want to change it
     lr_num_features = x_train_lr.shape[1]
     lr_sample_size = x_train_lr.shape[0]
-    lr = LinearRegression(lr_learning_rate, lr_early_stop, lr_num_features, lr_sample_size)
+    lr = LinearRegression(lr_learning_rate, lr_epochs, lr_num_features, lr_sample_size)
     lr_loss = lr.train(x_train_lr, y_train_lr, x_val_lr, y_val_lr)
     # predictions
     lr_bias, lr_var = bias_variance(lr, x_train, y_train, x_test, y_test)
@@ -238,7 +252,6 @@ def main_test_2():
     # DNN 8 out
     layers = [8]
     loss = 'mse'
-    # loss = 'mae'
     # learning_rate = 1e-4
     learning_rate=1e-2
     metrics = [keras.metrics.R2Score(), keras.metrics.MeanSquaredError(), keras.metrics.MeanAbsoluteError()]
@@ -345,6 +358,12 @@ def main_test_2():
     dnn5_loss = dnn5.history.history['loss']
     plot(lr_loss, dnn1_loss, dnn2_loss, dnn3_loss, dnn4_loss, dnn5_loss)
 
+    # my best model is generally dnn1
+    # save weights
+    dnn1.model.save('weights.txt')
+    # create submission.csv
+
+
     return
 
 def bias_variance(model, x_train, y_train, x_test, y_test, runs=30):
@@ -399,15 +418,22 @@ break for dinner and class
     - *update bias/variance 
     - *smaller issues + after the previous fixes
 wow that made things a lot better
-- send email, about if kaggle needs to be reopened?
-- continue chatting with AI to find something that was wrong - maybe ask more targeted questions
-- update report - include pre and post AI
-- best model weights
-- function for best model to output submission
+
+10/1/26 start 1133am 
+*check if i can still submit through kaggle - yes i can, late submission
+*send email, about if kaggle needs to be reopened?
+- *continue chatting with AI to find something that was wrong - maybe ask more targeted questions
+    lets do chatgpt, and ask about interpretation?
+- *update report - include pre and post AI
+- *best model weights
+- *function for best model to output submission 
+129pm
+- clean up code
+- submit to kaggle
+- submit report and weights and anything else 
 
 """
 
 
 if __name__ == "__main__":
-    print("hello world")
-    main_test_2()
+    main()
