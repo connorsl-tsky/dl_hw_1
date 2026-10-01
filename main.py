@@ -267,9 +267,9 @@ wow that made things a lot better
 - *best model weights
 - *function for best model to output submission 
 129pm
-- clean up code
-- submit to kaggle
-- submit report and weights and anything else 
+- *clean up code
+- *submit to kaggle - 341pm
+- *submit report and weights and anything else 
 
 """
 
